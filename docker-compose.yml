@@ -1,0 +1,36 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./postgres/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_PASSWORD: root_password
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+
+  web:
+    build: .
+    container_name: web
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app/web
+  
+volumes:
+  postgres:
+  redis:
