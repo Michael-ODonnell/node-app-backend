@@ -5,6 +5,20 @@ Creates a local environment backend infrasctructure with Postgres(https://www.pr
 - [Docker](https://docs.docker.com/install/)
 
 ## Usage
+### Example curl requests to the API
+
+Create a user
+```
+curl -H "Content-Type: application/json" \
+  --request POST \
+  -d '{"username":boo"}' \
+  http://localhost:3000/users/create
+```
+
+Get a username from a GUID
+```
+curl http://localhost:3000/users/*GUID*
+```
 
 ## Commands
 

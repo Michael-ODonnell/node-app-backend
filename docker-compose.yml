@@ -30,6 +30,8 @@ services:
       - "3000:3000"
     volumes:
       - ./web:/app/web
+    depends_on:
+      - postgres
   
 volumes:
   postgres:
