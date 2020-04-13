@@ -1,5 +1,5 @@
 # About
-Creates a local environment backend infrasctructure with Postgres(https://www.prostresql.org), Redis(https://redis.io/) and a simple Node(https://nodejs.org/en/) based API based on expressJs(https://expressjs.com/)
+Creates a local environment backend infrasctructure with [Postgres](https://www.prostresql.org), [Redis](https://redis.io/) and a simple [Node](https://nodejs.org/en/) based API based on [expressJs](https://expressjs.com/)
 
 ## Requirements
 - [Docker](https://docs.docker.com/install/)
@@ -38,9 +38,17 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 ### Access container  
 `docker exec -it web bash`  
 `docker exec -it redis bash`  
-`docker exec -it postgres bash`  
+`docker exec -it postgres bash` 
+
+## To Do
+- Redis example of shared state. Create a simple queue and new worker process to consume.
+- DB abstraction. Hide pg behind a wrapper to more easily enable substitution
+- DB migration. Shell script to perform new migrations and update metadata table using adding email and password fields (using BCrypt) to the users table as an example.
+- Authenticated requests. Create a logged in endpoint that can only be accessed by authenticating the user.
+- Session persistence using Redis and JWT.
+- Terraform setup.
 
 ## Notes
 * Scripts in postgres/init.d get executed upon volume creation in alphabetical order
-* PGAdmin(https://www.pgadmin.org/) is a cross platform Web based UI for postgres
-* RedisInsight(https://redislabs.com/redisinsight/) is similar for Redis
+* [PGAdmin](https://www.pgadmin.org/) is a cross platform Web based UI for postgres
+* [RedisInsight](https://redislabs.com/redisinsight/) is similar for Redis
