@@ -11,7 +11,7 @@ Create a user
 ```
 curl -H "Content-Type: application/json" \
   --request POST \
-  -d '{"username":boo"}' \
+  -d '{"username":"boo"}' \
   http://localhost:3000/users/create
 ```
 
@@ -20,11 +20,17 @@ Get a username from a GUID
 curl http://localhost:3000/users/*GUID*
 ```
 
+Publish a message
+```
+curl -H "Content-Type: application/json"   --request POST   -d '{"message":"Hi everybody"}'   http://localhost:3000/messages/publish
+```
+
 ## Commands
 
 ### Launching the backend
 Launch
 `docker compose up -d`
+
 View logs 
 `docker compose logs -f`
 
@@ -41,7 +47,6 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 `docker exec -it postgres bash` 
 
 ## To Do
-- Redis example of shared state. Create a simple queue and new worker process to consume.
 - DB abstraction. Hide pg behind a wrapper to more easily enable substitution
 - DB migration. Shell script to perform new migrations and update metadata table using adding email and password fields (using BCrypt) to the users table as an example.
 - Authenticated requests. Create a logged in endpoint that can only be accessed by authenticating the user.

@@ -1,5 +1,5 @@
 const express = require("express");
-const { Pool, Client } = require('pg');
+const { Pool } = require('pg');
 const userQueries = require('../db/users');
 
 const usersRoute = express.Router();
@@ -22,7 +22,6 @@ usersRoute.get('/:id', function (req, res) {
 });
 
 usersRoute.post('/create', function (req, res) {
-    console.log(req.body);
     const username = req.body.username;
     pool.query(userQueries.insert, [`${username}`])
     .then(dbResponse => {
