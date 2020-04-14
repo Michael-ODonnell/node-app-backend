@@ -9,10 +9,7 @@ Creates a local environment backend infrasctructure with [Postgres](https://www.
 
 Create a user
 ```
-curl -H "Content-Type: application/json" \
-  --request POST \
-  -d '{"username":"boo"}' \
-  http://localhost:3000/users/create
+curl -H "Content-Type: application/json" --request POST -d '{"username":"boo"}' http://localhost:3000/users/create
 ```
 
 Get a username from a GUID
@@ -47,7 +44,6 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 `docker exec -it postgres bash` 
 
 ## To Do
-- DB abstraction. Hide pg behind a wrapper to more easily enable substitution
 - DB migration. Shell script to perform new migrations and update metadata table using adding email and password fields (using BCrypt) to the users table as an example.
 - Authenticated requests. Create a logged in endpoint that can only be accessed by authenticating the user.
 - Session persistence using Redis and JWT.

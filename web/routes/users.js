@@ -1,10 +1,8 @@
 const express = require("express");
-const { Pool } = require('pg');
 const userQueries = require('../db/users');
+const db = require('../../common/sqlDatabaseConnection');
 
 const usersRoute = express.Router();
-
-const pool = new Pool()
 
 // define the home page route
 usersRoute.get('/', function (req, res) {
@@ -14,18 +12,18 @@ usersRoute.get('/', function (req, res) {
 // define the home page route
 usersRoute.get('/:id', function (req, res) {
     const id = req.params.id;
-    pool.query(userQueries.getUserName, [`${id}`])
+    db.executeQuery(userQueries.getUserName, [`${id}`])
     .then(dbResponse => {
-        const username = dbResponse.rows[0].username;
+        const username = dbResponse[0].username;
         res.send(username);
     });
 });
 
 usersRoute.post('/create', function (req, res) {
     const username = req.body.username;
-    pool.query(userQueries.insert, [`${username}`])
+    db.executeQuery(userQueries.insert, [`${username}`])
     .then(dbResponse => {
-        const id = dbResponse.rows[0].id;
+        const id = dbResponse[0].id;
         res.send(id);
     });
 });
