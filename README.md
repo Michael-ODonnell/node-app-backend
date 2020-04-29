@@ -22,6 +22,12 @@ Publish a message
 curl -H "Content-Type: application/json"   --request POST   -d '{"message":"Hi everybody"}'   http://localhost:3000/messages/publish
 ```
 
+Run database migrations
+```
+docker exec postgres bash //docker-entrypoint-initdb.d/run_migrations.sh -u postgres -d postgres
+```
+Existing migrations are applied automatically when the container is created, but you'll need to run this to apply new migrations.
+
 ## Commands
 
 ### Launching the backend
@@ -44,7 +50,6 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 `docker exec -it postgres bash` 
 
 ## To Do
-- DB migration. Shell script to perform new migrations and update metadata table using adding email and password fields (using BCrypt) to the users table as an example.
 - Authenticated requests. Create a logged in endpoint that can only be accessed by authenticating the user.
 - Session persistence using Redis and JWT.
 - Terraform setup.
