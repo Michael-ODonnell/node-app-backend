@@ -9,12 +9,12 @@ Creates a local environment backend infrasctructure with [Postgres](https://www.
 
 Create a user
 ```
-curl -H "Content-Type: application/json" --request POST -d '{"username":"boo"}' http://localhost:3000/users/create
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "*EMAIL*", "password":"*PASSWORD*", "username":"*USERNAME*"}'   http://localhost:3000/users/create
 ```
 
-Get a username from a GUID
+Send an authenticated request
 ```
-curl http://localhost:3000/users/*GUID*
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "not@a.real.email", "password":"password"}'   http://localhost:3000/users/*USERNAME*
 ```
 
 Publish a message
@@ -37,6 +37,9 @@ Launch
 View logs 
 `docker compose logs -f`
 
+Install components. This needs to be done through the container due to differences between bcrypt versions on linux and Mac
+`docker exec -t web npm install`
+
 ### Database volume management
 List all volumes  
 `docker volume ls`  
@@ -50,7 +53,6 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 `docker exec -it postgres bash` 
 
 ## To Do
-- Authenticated requests. Create a logged in endpoint that can only be accessed by authenticating the user.
 - Session persistence using Redis and JWT.
 - Terraform setup.
 

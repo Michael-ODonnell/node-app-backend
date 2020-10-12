@@ -2,7 +2,10 @@ const express = require("express");
 const userQueries = require('../db/users');
 const db = require('../../common/sqlDatabaseConnection');
 
+const bcrypt = require('bcrypt');
+
 const usersRoute = express.Router();
+const saltRounds = 10;
 
 // define the home page route
 usersRoute.get('/', function (req, res) {
@@ -10,21 +13,49 @@ usersRoute.get('/', function (req, res) {
 });
 
 // define the home page route
-usersRoute.get('/:id', function (req, res) {
-    const id = req.params.id;
-    db.executeQuery(userQueries.getUserName, [`${id}`])
+usersRoute.post('/:username', function (req, res) {
+    const requestedUser = req.params.username;
+    const email = req.body.email;
+    const plaintextPassword = req.body.password;
+
+    db.executeQuery(userQueries.getAuthDetails, [`${email}`])
     .then(dbResponse => {
-        const username = dbResponse[0].username;
-        res.send(username);
+        const authenticatedUser = dbResponse[0];
+        if(!authenticatedUser){
+            res.status(403).send('not authenticated');
+            return;
+        }
+
+        bcrypt.compare(plaintextPassword, authenticatedUser.hash)
+        .then(result => {
+            if(result && authenticatedUser.username === requestedUser) {
+                res.send('authenticated');
+            }
+            else if(result) {
+                res.status(403).send('wrong user');
+            }
+            else {
+                res.status(403).send('not authenticated');
+            }
+
+        })
     });
 });
 
 usersRoute.post('/create', function (req, res) {
+    const email = req.body.email;
+    const plaintextPassword = req.body.password;
     const username = req.body.username;
-    db.executeQuery(userQueries.insert, [`${username}`])
+    bcrypt.hash(plaintextPassword, saltRounds)
+    .then(hash => {
+        return db.executeQuery(userQueries.insert, [`${email}`, `${hash}`, `${username}`]);
+    })
     .then(dbResponse => {
-        const id = dbResponse[0].id;
-        res.send(id);
+        const email = dbResponse[0].email;
+        res.send(email);
+    })
+    .catch(err => {
+        console.error(JSON.stringify(err))
     });
 });
 
