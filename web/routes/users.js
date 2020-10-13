@@ -1,8 +1,8 @@
 const express = require("express");
-const userQueries = require('../db/users');
-const db = require('../../common/sqlDatabaseConnection');
 
-const bcrypt = require('bcrypt');
+const db = require('../../common/sqlDatabaseConnection');
+const userQueries = require('../db/users');
+const session = require('../../common/session');
 
 const usersRoute = express.Router();
 const saltRounds = 10;
@@ -12,35 +12,48 @@ usersRoute.get('/', function (req, res) {
     res.send('Users home page');
 });
 
-// define the home page route
-usersRoute.post('/:username', function (req, res) {
-    const requestedUser = req.params.username;
+// authenticate a user and return a session token
+usersRoute.post('/login', function (req, res) {
     const email = req.body.email;
     const plaintextPassword = req.body.password;
 
     db.executeQuery(userQueries.getAuthDetails, [`${email}`])
     .then(dbResponse => {
-        const authenticatedUser = dbResponse[0];
-        if(!authenticatedUser){
-            res.status(403).send('not authenticated');
-            return;
+        const user = dbResponse[0];
+        if(!user){
+            res.status(403).send('Invalid login details');
+            return
         }
 
-        bcrypt.compare(plaintextPassword, authenticatedUser.hash)
-        .then(result => {
-            if(result && authenticatedUser.username === requestedUser) {
-                res.send('authenticated');
-            }
-            else if(result) {
-                res.status(403).send('wrong user');
-            }
-            else {
-                res.status(403).send('not authenticated');
-            }
-
-        })
+        return session.create(user, plaintextPassword)
+    })
+    .then(response => {
+        res.json(response);
+    })
+    .catch(error => {
+        res.status(error.status).send(error.message);
     });
 });
+
+usersRoute.post('/refresh', 
+    session.checkToken(),
+    function (req, res) {
+        session.refresh(req.token)
+        .then(response => {
+            res.json(response);
+        })
+        .catch(err => {
+            res.status(err.status).send(err.message);
+        });
+    }
+);
+
+usersRoute.post('/validate', 
+    session.checkToken(),
+    function (req, res) {
+        res.json({isValid: true})
+    }
+);
 
 usersRoute.post('/create', function (req, res) {
     const email = req.body.email;

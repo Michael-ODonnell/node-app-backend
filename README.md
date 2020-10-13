@@ -12,9 +12,21 @@ Create a user
 curl -H "Content-Type: application/json"   --request POST   -d '{"email": "*EMAIL*", "password":"*PASSWORD*", "username":"*USERNAME*"}'   http://localhost:3000/users/create
 ```
 
-Send an authenticated request
+Send an login request and get a session token
 ```
-curl -H "Content-Type: application/json"   --request POST   -d '{"email": "not@a.real.email", "password":"password"}'   http://localhost:3000/users/*USERNAME*
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "not@a.real.email", "password":"password"}'   http://localhost:3000/users/login
+```
+
+Send a method to validate a user
+```
+TOKEN="*TOKEN*"
+curl -H "Content-Type: application/json"   --request POST   -d "{/"token/": /"$TOKEN"}"   http://localhost:3000/users/validate
+```
+
+Refresh the expiry on a token
+```
+TOKEN="*TOKEN*"
+curl -H "Content-Type: application/json"   --request POST   -d "{/"token/": /"$TOKEN"}"   http://localhost:3000/users/refresh
 ```
 
 Publish a message
@@ -53,7 +65,6 @@ Delete the data volumes. This erases all stored data and will recreate the db on
 `docker exec -it postgres bash` 
 
 ## To Do
-- Session persistence using Redis and JWT.
 - Terraform setup.
 
 ## Notes
