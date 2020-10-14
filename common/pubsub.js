@@ -9,6 +9,10 @@ module.exports = {
             this._channel = channel;
         }
 
+        channel(){
+            return this._channel;
+        }
+
         publish(message) {
             this._publisher.publish(this._channel, message);
         }
@@ -27,6 +31,10 @@ module.exports = {
             this._subscriber.on("message", (channel, message) => {
                 this._messageHandlers.forEach(messageHandler => messageHandler(message))
             });
+        }
+
+        channel(){
+            return this._channel;
         }
 
         close(){

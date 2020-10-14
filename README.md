@@ -9,29 +9,47 @@ Creates a local environment backend infrasctructure with [Postgres](https://www.
 
 Create a user
 ```
-curl -H "Content-Type: application/json"   --request POST   -d '{"email": "*EMAIL*", "password":"*PASSWORD*", "username":"*USERNAME*"}'   http://localhost:3000/users/create
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "*EMAIL*", "password": "*PASSWORD*", "username":"*USERNAME*"}'   http://localhost:3000/users/create
 ```
 
 Send an login request and get a session token
+You can optionally request a dev token with a much longer lifespan. This only works in development environments. Production environments will return the default length token
 ```
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "*EMAIL_ADDRESS*", "password":"*PASSWORD*"}'   http://localhost:3000/users/login
 curl -H "Content-Type: application/json"   --request POST   -d '{"email": "not@a.real.email", "password":"password"}'   http://localhost:3000/users/login
+curl -H "Content-Type: application/json"   --request POST   -d '{"email": "not@a.real.email", "password": "password", "dev_token": true}'   http://localhost:3000/users/login
 ```
 
 Send a method to validate a user
 ```
 TOKEN="*TOKEN*"
-curl -H "Content-Type: application/json"   --request POST   -d "{/"token/": /"$TOKEN"}"   http://localhost:3000/users/validate
+curl -H "Content-Type: application/json"   --request POST   -d "{\"token\": \"$TOKEN\"}"   http://localhost:3000/users/validate
 ```
 
 Refresh the expiry on a token
 ```
 TOKEN="*TOKEN*"
-curl -H "Content-Type: application/json"   --request POST   -d "{/"token/": /"$TOKEN"}"   http://localhost:3000/users/refresh
+curl -H "Content-Type: application/json"   --request POST   -d "{\"token\": \"$TOKEN\"}"   http://localhost:3000/users/refresh
+curl -H "Content-Type: application/json"   --request POST   -d '{\"token\": \"$TOKEN\", \"dev_token\": true}'   http://localhost:3000/users/login
 ```
 
-Publish a message
+Listen to server stream
 ```
-curl -H "Content-Type: application/json"   --request POST   -d '{"message":"Hi everybody"}'   http://localhost:3000/messages/publish
+TOKEN="*TOKEN*"
+curl -H "Content-Type: application/json"  http://localhost:3001/listen/$TOKEN
+```
+
+Echo a message to an SSE listener
+```
+TOKEN="*TOKEN*"
+curl -H "Content-Type: application/json"  -d "{\"token\": \"$TOKEN\",\"message\": \"Hi everybody\"}"   http://localhost:3000/messages/echo
+```
+
+Control subscription to the heartbeat worker
+```
+TOKEN="*TOKEN*"
+curl -H "Content-Type: application/json"  -d "{\"token\": \"$TOKEN\"}"   http://localhost:3000/messages/heartbeat/start
+curl -H "Content-Type: application/json"  -d "{\"token\": \"$TOKEN\"}"   http://localhost:3000/messages/heartbeat/stop
 ```
 
 Run database migrations

@@ -6,53 +6,58 @@ const uuid = require('node-uuid')
 const PRIVATE_SESSION_KEY = process.env.PRIVATE_SESSION_KEY;
 const PUBLIC_SESSION_KEY = process.env.PUBLIC_SESSION_KEY;
 const SESSION_KEY_ALGORITHM = process.env.SESSION_KEY_ALGORITHM;
-const SESSION_TTL = 60
+const DEFAULT_SESSION_TTL = 300;
 
 class Session {
 
-    create(user, password){
+    create(user, password, ttl = DEFAULT_SESSION_TTL){
         return bcrypt.compare(password, user.hash)
         .then(result => {
-            return new Promise((resolve, reject)=>{
-                if(result) {
-                    jwt.sign({
-                        username: user.username,
-                        email: user.email,
-                        session_id: uuid.v4(),
-                    }, PRIVATE_SESSION_KEY, {
-                        expiresIn: SESSION_TTL,
-                        algorithm: SESSION_KEY_ALGORITHM
-                    }, (error, token) => {
-                        if(error) {
-                            reject({status: 403, error});
-                        }
-                        else{
-                            resolve({token, session_ttl: SESSION_TTL});
-                        }
-                    })
-                }
-                else {
-                    reject({status: 403, error: 'Invalid login details'});
-                }
-            })
+            if(result) {
+                return this._buildSessionToken(user, ttl)
+            }
+            else {
+                return Promise.reject({status: 403, error: 'Invalid login details'});
+            }
         });
     }
 
-    refresh(token){
+    _buildSessionToken(user, ttl) {
         return new Promise((resolve, reject)=>{
             jwt.sign({
-                username: token.username,
-                email: token.email,
-                session_id: token.session_id,
+                username: user.username,
+                email: user.email,
+                session_id: uuid.v4(),
             }, PRIVATE_SESSION_KEY, {
-                expiresIn: SESSION_TTL,
+                expiresIn: ttl,
                 algorithm: SESSION_KEY_ALGORITHM
             }, (error, token) => {
                 if(error) {
                     reject({status: 403, error});
                 }
                 else{
-                    resolve({token, session_ttl: SESSION_TTL});
+                    resolve({token, session_ttl: ttl});
+                }
+            })
+        });
+    }
+
+    refresh(token, ttl = DEFAULT_SESSION_TTL){
+
+        return new Promise((resolve, reject)=>{
+            jwt.sign({
+                username: token.username,
+                email: token.email,
+                session_id: token.session_id,
+            }, PRIVATE_SESSION_KEY, {
+                expiresIn: ttl,
+                algorithm: SESSION_KEY_ALGORITHM
+            }, (error, token) => {
+                if(error) {
+                    reject({status: 403, error});
+                }
+                else{
+                    resolve({token, session_ttl: ttl});
                 }
             });
         });

@@ -6,6 +6,8 @@ const session = require('../../common/session');
 
 const usersRoute = express.Router();
 const saltRounds = 10;
+const DAYS_IN_SECONDS = 24*60*60;
+const MINUTES_IN_SECONDS = 60;
 
 // define the home page route
 usersRoute.get('/', function (req, res) {
@@ -16,16 +18,17 @@ usersRoute.get('/', function (req, res) {
 usersRoute.post('/login', function (req, res) {
     const email = req.body.email;
     const plaintextPassword = req.body.password;
+    const getDevToken = process.env.NODE_ENV === 'development' && req.body.dev_token === true;
+    const ttl = getDevToken ? 180*DAYS_IN_SECONDS : 5*MINUTES_IN_SECONDS;
 
     db.executeQuery(userQueries.getAuthDetails, [`${email}`])
     .then(dbResponse => {
         const user = dbResponse[0];
         if(!user){
-            res.status(403).send('Invalid login details');
-            return
+            return Promise.reject({status: 403, error: 'Invalid login details'})
         }
 
-        return session.create(user, plaintextPassword)
+        return session.create(user, plaintextPassword, ttl);
     })
     .then(response => {
         res.json(response);
@@ -38,7 +41,9 @@ usersRoute.post('/login', function (req, res) {
 usersRoute.post('/refresh', 
     session.checkToken(),
     function (req, res) {
-        session.refresh(req.token)
+        const getDevToken = process.env.NODE_ENV === 'development' && req.body.dev_token === true;
+        const ttl = getDevToken ? 180*DAYS_IN_SECONDS : 5*MINUTES_IN_SECONDS;
+        session.refresh(req.token, ttl)
         .then(response => {
             res.json(response);
         })
